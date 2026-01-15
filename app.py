@@ -10,16 +10,16 @@ from langchain.chains.retrieval import create_retrieval_chain
 import os
 from dotenv import load_dotenv
 
-# -------------------- ENV SETUP --------------------
+#ENV SETUP 
 load_dotenv()
 os.environ["HF_TOKEN"] = os.getenv("HF_TOKEN")
 
-# -------------------- EMBEDDINGS --------------------
+#EMBEDDINGS
 embeddings = HuggingFaceEmbeddings(
     model_name="all-MiniLM-L6-v2"
 )
 
-# -------------------- STREAMLIT UI --------------------
+#STREAMLIT UI
 st.title("📄 PDF Assistant")
 st.write("Summarize PDFs or ask questions from them")
 
@@ -28,7 +28,7 @@ api_key = st.text_input(
     type="password"
 )
 
-# -------------------- MAIN APP --------------------
+#MAIN APP
 if api_key:
     llm = ChatGroq(
         groq_api_key=api_key,
@@ -52,14 +52,14 @@ if api_key:
             loader = PyPDFLoader("temp.pdf")
             documents.extend(loader.load())
 
-        # -------------------- TEXT SPLITTING --------------------
+        #TEXT SPLITTING
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200
         )
         splits = splitter.split_documents(documents)
 
-        # -------------------- VECTOR STORE --------------------
+        #VECTOR STORE
         vectorstore = Chroma.from_documents(
             documents=splits,
             embedding=embeddings
@@ -69,13 +69,13 @@ if api_key:
             search_kwargs={"k": 8}
         )
 
-        # -------------------- MODE SELECTION --------------------
+        # MODE SELECTION
         mode = st.radio(
             "Choose an action",
             ["📄 Summarize PDF", "❓ Ask a Question"]
         )
 
-        # ==================== SUMMARY MODE ====================
+        #SUMMARY MODE
         if mode == "📄 Summarize PDF":
             summary_prompt = ChatPromptTemplate.from_messages(
                 [
@@ -111,7 +111,7 @@ if api_key:
                 st.subheader("📄 Document Summary")
                 st.write(response["answer"])
 
-        # ==================== Q&A MODE ====================
+        #Q&A MODE
         if mode == "❓ Ask a Question":
             question = st.text_input(
                 "Ask a question from the PDF"
